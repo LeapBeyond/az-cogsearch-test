@@ -1,18 +1,15 @@
-provider azurerm {
-  version                 = "~>2.0"
-  client_certificate_path = var.client_certificate_path
-  client_id               = var.client_id
-  subscription_id         = var.subscription_id
-  tenant_id               = var.tenant_id
-  features {}
-}
-
+# ----------------------------------------------------------------------------------------------------------------
+# resource group to contain everything
+# ----------------------------------------------------------------------------------------------------------------
 resource azurerm_resource_group rg {
   name     = var.base_name
   location = var.rg_location
   tags     = merge({ "Name" = "CogServTestTwo" }, var.tags)
 }
 
+# ----------------------------------------------------------------------------------------------------------------
+# storage account for holding the blobs
+# ----------------------------------------------------------------------------------------------------------------
 resource azurerm_storage_account cogserv {
   name                      = var.base_name
   resource_group_name       = azurerm_resource_group.rg.name
