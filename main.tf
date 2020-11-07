@@ -28,3 +28,15 @@ resource azurerm_storage_container cogserv {
   storage_account_name  = azurerm_storage_account.cogserv.name
   container_access_type = "private"
 }
+
+# ----------------------------------------------------------------------------------------------------------------
+# search service for the index
+# ----------------------------------------------------------------------------------------------------------------
+resource azurerm_search_service cogserv {
+  name                          = var.base_name
+  resource_group_name           = azurerm_resource_group.rg.name
+  location                      = azurerm_resource_group.rg.location
+  public_network_access_enabled = false
+  sku                           = "basic"
+  tags                          = merge({ "Name" = "CogServTestTwo" }, var.tags)
+}
