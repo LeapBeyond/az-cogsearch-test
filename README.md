@@ -275,11 +275,12 @@ The columns are:
  - label: 1 if the product question is humorous, 0 otherwise.
 
 ## References
-https://docs.microsoft.com/en-us/azure/developer/terraform/overview
-https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
-https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_certificate
-https://docs.microsoft.com/en-us/azure/search/query-simple-syntax
-https://docs.microsoft.com/en-us/azure/search/query-odata-filter-orderby-syntax
+
+ - https://docs.microsoft.com/en-us/azure/developer/terraform/overview
+ - https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
+ - https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_certificate
+ - https://docs.microsoft.com/en-us/azure/search/query-simple-syntax
+ - https://docs.microsoft.com/en-us/azure/search/query-odata-filter-orderby-syntax
 
 ## License
 Copyright 2020 Leap Beyond Emerging Technologies B.V.
