@@ -9,11 +9,12 @@ variable "tags" {
 }
 
 variable base_name {
+  description = "base of all names"
   type    = string
-  default = "cogservtesttwo"
 }
 
 variable rg_location {
+  description = "location to install into"
   type    = string
   default = "uksouth"
 }
