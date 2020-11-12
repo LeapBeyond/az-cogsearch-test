@@ -42,7 +42,7 @@ $ az login --service-principal -u http://terraformaz -p ~/.ssh/terraformaz.pem -
 but it cannot be used for authentication by Terraform without [converting it to a PFX](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_certificate):
 
 ```
-$ openssl pkcs12 -inkey terraformaz.pem -in terraformaz.cert -export -out terraformaz.pfx
+$ openssl pkcs12 -inkey terraformaz.pem -in terraformaz.pem -export -out terraformaz.pfx
 ```
 
 ## Usage
