@@ -12,6 +12,7 @@
 **/*.tfstate
 **/*.tfstate.*
 
+data/
 
 **/*.zip
 
