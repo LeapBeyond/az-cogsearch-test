@@ -277,9 +277,8 @@ The columns are:
 
 ## References
 
- - https://docs.microsoft.com/en-us/azure/developer/terraform/overview
- - https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
- - https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_certificate
+ - https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/
+ - https://docs.microsoft.com/en-us/azure/templates/
  - https://docs.microsoft.com/en-us/azure/search/query-simple-syntax
  - https://docs.microsoft.com/en-us/azure/search/query-odata-filter-orderby-syntax
 
