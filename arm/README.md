@@ -1,8 +1,9 @@
-# hybrid
+# arm
 
-This example uses a hybrid of Terraform and API calls.
+This example uses a combination of ARM Templates and API Calls
 
 ## Usage
+
 After checking this out, the first thing you need to do is create a configuration file in the working directory called `env.rc`, using this as an example:
 
 ```
@@ -10,12 +11,11 @@ export CLIENT_CERT=~/.ssh/terraformaz.pfx
 export SPNAME=http://terraformaz
 export SPKEY=~/.ssh/terraformaz.pem
 export TENANT=azureleapbeyond
-export NAME=rahexample
-export LOCATION=uksouth
 export TMPLOC=${TMPDIR-/tmp}
+
 ```
 
-This file is used by both the scripts and Terraform to access and configure the environment.
+This file is used by both the scripts to access and configure the environment.
 
 | field | comment |
 |------ | ------- |
@@ -23,9 +23,23 @@ This file is used by both the scripts and Terraform to access and configure the 
 | SPNAME | name of the Service Principal |
 | SPKEY | path to the PEM used by scripts to connect as the Service Principal |
 | TENANT | Name of the target tenant |
-| NAME | The prefix used for naming all generated assets - this needs to be alphanumeric, with no spaces. keep it short |
-| LOCATION | The Azure region to build the assets in |
 | TMPLOC | a directory on the local filesystem used for storing temporary files |
+
+You may also need to update the default parameters used by ARM:
+
+```
+{
+  "baseName": {
+    "value": "cogsearch"
+  },
+  "targetLocation" : {
+    "value": "uksouth"
+  },
+  "subscriptionId" : {
+    "value": "93b4e6fc-acb0-44ce-bc65-bcfc9b626edc"
+  }
+}
+```
 
 There are three scripts to use. `setup.sh` sets up the assets, `teardown.sh` tears them down, and `search.sh` executes a sample query. These scripts take no command line options:
 
@@ -37,17 +51,17 @@ $ ./setup.sh
 ========================================================================================================
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100 1792k  100 1792k    0     0   716k      0  0:00:02  0:00:02 --:--:--  716k
+100 1792k  100 1792k    0     0   933k      0  0:00:01  0:00:01 --:--:--  933k
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100 1798k  100 1798k    0     0  1093k      0  0:00:01  0:00:01 --:--:-- 1093k
+100 1798k  100 1798k    0     0   982k      0  0:00:01  0:00:01 --:--:--  982k
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100 1942k  100 1942k    0     0  1163k      0  0:00:01  0:00:01 --:--:-- 1163k
-total 13304
--rw-r--r--  1 robert  staff  1835543 12 Nov 16:50 Humorous.csv
--rw-r--r--  1 robert  staff  1841256 12 Nov 16:50 Non-humorous-unbiased.csv
--rw-r--r--  1 robert  staff  1989566 12 Nov 16:50 Non-humours-biased.csv
+100 1942k  100 1942k    0     0  1035k      0  0:00:01  0:00:01 --:--:-- 1035k
+total 12672
+-rw-r--r--  1 robert  staff  1835543 18 Nov 13:19 Humorous.csv
+-rw-r--r--  1 robert  staff  1841256 18 Nov 13:19 Non-humorous-unbiased.csv
+-rw-r--r--  1 robert  staff  1989566 18 Nov 13:19 Non-humours-biased.csv
 
 ========================================================================================================
 | Logging in
@@ -70,17 +84,46 @@ total 13304
 ]
 
 ========================================================================================================
-| Executing Terraform
+| Create resource group
 ========================================================================================================
-.
-.
-.
-Apply complete! Resources: 7 added, 0 changed, 0 destroyed.
+{
+   ...
+}
+
+========================================================================================================
+| Deploy template
+========================================================================================================
+{
+   ...
+}
+
+========================================================================================================
+| Waiting for creation
+========================================================================================================
 
 ========================================================================================================
 | Fetch connection string and api key
 ========================================================================================================
 Command group 'search' is in preview. It may be changed/removed in a future release.
+
+========================================================================================================
+| Load files to blob storage
+========================================================================================================
+Finished[#############################################################]  100.0000%
+{
+  "etag": "\"0x8D88BC4CF78AB99\"",
+  "lastModified": "2020-11-18T13:21:08+00:00"
+}
+Finished[#############################################################]  100.0000%
+{
+  "etag": "\"0x8D88BC4D01D6BF4\"",
+  "lastModified": "2020-11-18T13:21:09+00:00"
+}
+Finished[#############################################################]  100.0000%
+{
+  "etag": "\"0x8D88BC4D0CA43ED\"",
+  "lastModified": "2020-11-18T13:21:10+00:00"
+}
 
 ========================================================================================================
 | Set up datasource
@@ -104,19 +147,6 @@ Response: 204
 ========================================================================================================
 | check indexer status
 ========================================================================================================
-{
-  "status": "inProgress",
-  "errorMessage": null,
-  "startTime": "2020-11-12T16:51:11.26Z",
-  "endTime": null,
-  "itemsProcessed": 10000,
-  "itemsFailed": 0,
-  "initialTrackingState": null,
-  "finalTrackingState": null,
-  "errors": [],
-  "warnings": [],
-  "metrics": null
-}
 
 ========================================================================================================
 | Logging Out
@@ -126,7 +156,7 @@ Response: 204
 Although `setup.sh` pauses at the end to check if the indexer has finished indexing the input data, 1 minute may not be enough for it to finish, so it is recommend that you check the status of the indexer via the Azure console as well. The search will not succeed until the index has been populated by the indexer.
 
 ```
-./search.sh
+$ ./search.sh
 
 ========================================================================================================
 | Logging in
@@ -174,7 +204,7 @@ Response: 200
 When finished, the assets should be cleaned up:
 
 ```
-./teardown.sh
+$ ./teardown.sh
 
 ========================================================================================================
 | Logging in
@@ -182,9 +212,17 @@ When finished, the assets should be cleaned up:
 [
   {
     "cloudName": "AzureCloud",
-.
-.
-.
+    "homeTenantId": "b9f789f9-9772-46b0-9b68-ae52a4b6cfec",
+    "id": "93b4e6fc-acb0-44ce-bc65-bcfc9b626edc",
+    "isDefault": true,
+    "managedByTenants": [],
+    "name": "Leap Beyond",
+    "state": "Enabled",
+    "tenantId": "b9f789f9-9772-46b0-9b68-ae52a4b6cfec",
+    "user": {
+      "name": "http://terraformaz",
+      "type": "servicePrincipal"
+    }
   }
 ]
 
@@ -196,29 +234,35 @@ Command group 'search' is in preview. It may be changed/removed in a future rele
 ========================================================================================================
 | Removing indexer
 ========================================================================================================
+
 Response: 204
 
 ========================================================================================================
 | Removing index
 ========================================================================================================
+
 Response: 204
 
 ========================================================================================================
 | Removing datasource
 ========================================================================================================
+
 Response: 204
 
 ========================================================================================================
-| Executing Terraform
+| Un-deploy template
 ========================================================================================================
-Initializing the backend...
-.
-.
-.
-Destroy complete! Resources: 7 destroyed.
 
 ========================================================================================================
-| Logging Out
+| Waiting for deletion
+========================================================================================================
+
+========================================================================================================
+| Remove resource group
+========================================================================================================
+
+========================================================================================================
+| Logging out
 ========================================================================================================
 ```
 

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "string",
+      "minLength":3, "maxLength":24,
+      "defaultValue": "cogsearch",
+      "metadata": {
+        "description": "base name used for various resources"
+      }
+    },
+    "targetLocation": {
+      "type": "string",
+      "minLength":3, "maxLength":24,
+      "defaultValue": "uksouth",
+      "metadata": {
+        "description": "location to build resources in"
+      }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "minLength":36, "maxLength":36,
+      "metadata": {
+        "description": "target subscription"
+      }
+    }
+  },
+  "resources": [
+    {
+      "name": "[parameters('baseName')]",
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2020-06-01",
+      "location": "[parameters('targetLocation')]",
+      "properties": { }
+    }
+  ]
+}

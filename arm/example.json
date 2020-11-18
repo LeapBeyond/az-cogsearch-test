@@ -1,0 +1,152 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 24,
+      "defaultValue": "cogsearch",
+      "metadata": {
+        "description": "base name used for various resources"
+      }
+    },
+    "targetLocation": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 24,
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "location to build resources in"
+      }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "target subscription"
+      }
+    },
+    "commonTags": {
+      "type": "object",
+      "defaultValue": {
+        "Client": "Leap Beyond",
+        "Owner": "Robert",
+        "Project": "IU-UK"
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "comments": "Search Service that will contain the indexes and indexers",
+      "type": "Microsoft.Search/searchServices",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('baseName'),'-search')]",
+      "location": "[parameters('targetLocation')]",
+      "tags": {
+        "Name": "[parameters('baseName')]",
+        "Client": "[parameters('commonTags').Client]",
+        "Owner": "[parameters('commonTags').Owner]",
+        "Project": "[parameters('commonTags').Project]"
+      },
+      "sku": {
+        "name": "basic"
+      },
+      "identity": {
+        "type": "None"
+      },
+      "properties": {
+        "replicaCount": 1,
+        "partitionCount": 1,
+        "hostingMode": "Default",
+        "publicNetworkAccess": "Enabled",
+        "networkRuleSet": {
+          "ipRules": []
+        }
+      }
+    },
+    {
+      "comments": "Storage account that will contain the containers that contain the data to be indexed",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2020-08-01-preview",
+      "name": "[parameters('baseName')]",
+      "location": "[parameters('targetLocation')]",
+      "tags": {
+        "Name": "[parameters('baseName')]",
+        "Client": "[parameters('commonTags').Client]",
+        "Owner": "[parameters('commonTags').Owner]",
+        "Project": "[parameters('commonTags').Project]"
+      },
+      "sku": {
+        "name": "Standard_GRS",
+        "tier": "Standard"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": true,
+        "isHnsEnabled": false,
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "virtualNetworkRules": [],
+          "ipRules": [],
+          "defaultAction": "Allow"
+        },
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "services": {
+            "file": {
+              "keyType": "Account",
+              "enabled": true
+            },
+            "blob": {
+              "keyType": "Account",
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "comments": "Blob service that will hold the actual files",
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2020-08-01-preview",
+      "name": "[concat(parameters('baseName'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('baseName'))]"
+      ],
+      "sku": {
+        "name": "Standard_GRS",
+        "tier": "Standard"
+      },
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "deleteRetentionPolicy": {
+          "enabled": false
+        }
+      }
+    },
+    {
+        "comments": "blob container in the blob service",
+        "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+        "apiVersion": "2020-08-01-preview",
+        "name": "[concat(parameters('baseName'), '/default/', parameters('baseName'))]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('baseName'), 'default')]",
+            "[resourceId('Microsoft.Storage/storageAccounts', parameters('baseName'))]"
+        ],
+        "properties": {
+            "defaultEncryptionScope": "$account-encryption-key",
+            "denyEncryptionScopeOverride": false,
+            "publicAccess": "None"
+        }
+    }
+  ]
+}

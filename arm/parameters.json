@@ -1,0 +1,11 @@
+{
+  "baseName": {
+    "value": "cogsearch"
+  },
+  "targetLocation" : {
+    "value": "uksouth"
+  },
+  "subscriptionId" : {
+    "value": "93b4e6fc-acb0-44ce-bc65-bcfc9b626edc"
+  }
+}
