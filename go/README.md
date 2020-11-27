@@ -1,269 +1,120 @@
 # go
 
-This example uses Go to demonstrate using a 3GL to create and use the search example. It endeavours to use the [Azure SDK for Go](https://docs.microsoft.com/en-us/azure/developer/go/)
+This example uses Go to demonstrate using a 3GL to create and use the search example. It endeavours to use the [Azure SDK for Go](https://docs.microsoft.com/en-us/azure/developer/go/), but as with ARM and Terraform, this lags well behind the Azure API, so the parts of the example for creating the search index, and using the search, still falls back on using direct HTTP calls to the API.
 
 ## Usage
 
-After checking this out, the first thing you need to do is create a configuration file in the working directory called `env.rc`, using this as an example:
+After checking this out you need to create or update a `parameters.json` that is used by the example. The application can use a different specified parameter file for input, but defaults to `parameters.json`. It should resemble:
 
 ```
-export CLIENT_CERT=~/.ssh/terraformaz.pfx
-export SPNAME=http://terraformaz
-export SPKEY=~/.ssh/terraformaz.pem
-export TENANT=azureleapbeyond
-export TMPLOC=${TMPDIR-/tmp}
-
+{
+  "baseName": "cogsearch",
+  "serviceName": "cogsearch-search",
+  "targetLocation" : "uksouth",
+  "subscriptionId" :  "93b4e6fc-acb0-44ce-bc65-bcfc9b626edc",
+  "clientId": "e0d8c6a7-3e6b-4827-a0af-a191818e0ab7",
+  "servicePrincipal": "http://terraformaz",
+  "servicePrincipalKey": "/Users/robert/.ssh/terraformaz.pfx",
+  "tenant": "azureleapbeyond.onmicrosoft.com"
+}
 ```
 
-This file is used by both the scripts to access and configure the environment.
 
 | field | comment |
 |------ | ------- |
-| CLIENT_CERT | path to the PFX file used to allow Terraform to connect as the Service Principal |
-| SPNAME | name of the Service Principal |
-| SPKEY | path to the PEM used by scripts to connect as the Service Principal |
-| TENANT | Name of the target tenant |
-| TMPLOC | a directory on the local filesystem used for storing temporary files |
+| baseName | the base of most names used in the configuration |
+| serviceName | the name of the search service to create |
+| subscriptionId | the subscription ID |
+| clientId | the client or app ID for the service principal (future fixes may be able to find this from the principal) |
+| servicePrincipal | name of the Service Principal |
+| servicePrincipalKey| path to the PFX used to connect as the Service Principal |
+| tenant | Name of the target tenant |
 
-You may also need to update the default parameters used by ARM:
-
-```
-{
-  "baseName": {
-    "value": "cogsearch"
-  },
-  "targetLocation" : {
-    "value": "uksouth"
-  },
-  "subscriptionId" : {
-    "value": "93b4e6fc-acb0-44ce-bc65-bcfc9b626edc"
-  }
-}
-```
-
-There are three scripts to use. `setup.sh` sets up the assets, `teardown.sh` tears them down, and `search.sh` executes a sample query. These scripts take no command line options:
+To build the application, first [download and install Go](https://golang.org/doc/install). Next, compile the code:
 
 ```
-$ ./setup.sh
-
-========================================================================================================
-| Fetching data
-========================================================================================================
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100 1792k  100 1792k    0     0   933k      0  0:00:01  0:00:01 --:--:--  933k
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100 1798k  100 1798k    0     0   982k      0  0:00:01  0:00:01 --:--:--  982k
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100 1942k  100 1942k    0     0  1035k      0  0:00:01  0:00:01 --:--:-- 1035k
-total 12672
--rw-r--r--  1 robert  staff  1835543 18 Nov 13:19 Humorous.csv
--rw-r--r--  1 robert  staff  1841256 18 Nov 13:19 Non-humorous-unbiased.csv
--rw-r--r--  1 robert  staff  1989566 18 Nov 13:19 Non-humours-biased.csv
-
-========================================================================================================
-| Logging in
-========================================================================================================
-[
-  {
-    "cloudName": "AzureCloud",
-    "homeTenantId": "b9f789f9-9772-46b0-9b68-ae52a4b6cfec",
-    "id": "93b4e6fc-acb0-44ce-bc65-bcfc9b626edc",
-    "isDefault": true,
-    "managedByTenants": [],
-    "name": "Leap Beyond",
-    "state": "Enabled",
-    "tenantId": "b9f789f9-9772-46b0-9b68-ae52a4b6cfec",
-    "user": {
-      "name": "http://terraformaz",
-      "type": "servicePrincipal"
-    }
-  }
-]
-
-========================================================================================================
-| Create resource group
-========================================================================================================
-{
-   ...
-}
-
-========================================================================================================
-| Deploy template
-========================================================================================================
-{
-   ...
-}
-
-========================================================================================================
-| Waiting for creation
-========================================================================================================
-
-========================================================================================================
-| Fetch connection string and api key
-========================================================================================================
-Command group 'search' is in preview. It may be changed/removed in a future release.
-
-========================================================================================================
-| Load files to blob storage
-========================================================================================================
-Finished[#############################################################]  100.0000%
-{
-  "etag": "\"0x8D88BC4CF78AB99\"",
-  "lastModified": "2020-11-18T13:21:08+00:00"
-}
-Finished[#############################################################]  100.0000%
-{
-  "etag": "\"0x8D88BC4D01D6BF4\"",
-  "lastModified": "2020-11-18T13:21:09+00:00"
-}
-Finished[#############################################################]  100.0000%
-{
-  "etag": "\"0x8D88BC4D0CA43ED\"",
-  "lastModified": "2020-11-18T13:21:10+00:00"
-}
-
-========================================================================================================
-| Set up datasource
-========================================================================================================
-Response: 204
-
-========================================================================================================
-| Set up search index
-========================================================================================================
-Response: 204
-
-========================================================================================================
-| Create indexer
-========================================================================================================
-Response: 204
-
-========================================================================================================
-| sleeping 60 seconds to allow indexer to run
-========================================================================================================
-
-========================================================================================================
-| check indexer status
-========================================================================================================
-
-========================================================================================================
-| Logging Out
-========================================================================================================
+$ go build
+$ ls azcogsearch
+azcogsearch
 ```
 
-Although `setup.sh` pauses at the end to check if the indexer has finished indexing the input data, 1 minute may not be enough for it to finish, so it is recommend that you check the status of the indexer via the Azure console as well. The search will not succeed until the index has been populated by the indexer.
+The tool has command line help:
 
 ```
-$ ./search.sh
-
-========================================================================================================
-| Logging in
-========================================================================================================
-[
-  {
-    "cloudName": "AzureCloud",
-.
-.
-.
-  }
-]
-
-========================================================================================================
-| fetch query key
-========================================================================================================
-Command group 'search' is in preview. It may be changed/removed in a future release.
-
-========================================================================================================
-| run a query
-========================================================================================================
-
-Response: 200
-{
-  "@odata.context": "https://rahexample.search.windows.net/indexes('rahexample')/$metadata#docs(*)",
-  "value": [
-    {
-      "@search.score": 16.585403,
-      "question": "Does Donald Trump think BB-8 is a Loser or Hater?",
-      "product_description": "Original BB-8 by Sphero (No Droid Trainer)"
-    },
-    {
-      "@search.score": 15.260237,
-      "question": "Will I be perceived as a sore loser if I'm seen wearing this shirt in school?",
-      "product_description": "Donald Trump for President Make America Great Again T Shirt"
-    }
-  ]
-}
-
-========================================================================================================
-| Logging Out
-========================================================================================================
+% ./azcogsearch -help
+Usage of ./azcogsearch:
+  -d	delete example
+  -n string
+    	config file (default "parameters.json")
+  -s	perform a search
 ```
 
-When finished, the assets should be cleaned up:
+The default option is to build the assets, which takes about a minute:
 
 ```
-$ ./teardown.sh
+$ ./azcogsearch
 
-========================================================================================================
-| Logging in
-========================================================================================================
-[
-  {
-    "cloudName": "AzureCloud",
-    "homeTenantId": "b9f789f9-9772-46b0-9b68-ae52a4b6cfec",
-    "id": "93b4e6fc-acb0-44ce-bc65-bcfc9b626edc",
-    "isDefault": true,
-    "managedByTenants": [],
-    "name": "Leap Beyond",
-    "state": "Enabled",
-    "tenantId": "b9f789f9-9772-46b0-9b68-ae52a4b6cfec",
-    "user": {
-      "name": "http://terraformaz",
-      "type": "servicePrincipal"
-    }
-  }
-]
+2020/11/27 17:15:36 Starting...
+2020/11/27 17:15:36 Subscription ID: 93b4e6fc-acb0-44ce-bc65-bcfc9b626edc
+2020/11/27 17:15:36 Setting up...
+2020/11/27 17:15:36 Begin creating resource group cogsearch
+2020/11/27 17:15:37 resource group created: /subscriptions/93b4e6fc-acb0-44ce-bc65-bcfc9b626edc/resourceGroups/cogsearch
+2020/11/27 17:15:37 Begin creating search service cogsearch-search
+2020/11/27 17:15:41 search service: cogsearch-search (succeeded)
+2020/11/27 17:15:41 Fetching search service keys
+2020/11/27 17:15:41 Search service keys fetched
+2020/11/27 17:15:41 Begin creating storage account cogsearch
+2020/11/27 17:16:05 storage account: cogsearch (Succeeded)
+2020/11/27 17:16:05 Begin creating blob container in  cogsearch
+2020/11/27 17:16:05 blob storage container /subscriptions/93b4e6fc-acb0-44ce-bc65-bcfc9b626edc/resourceGroups/cogsearch/providers/Microsoft.Storage/storageAccounts/cogsearch/blobServices/default/containers/cogsearch created
+2020/11/27 17:16:05 Begining to search for connection string for storage account cogsearch
+2020/11/27 17:16:05 Connection String fetched
+2020/11/27 17:16:05 Begin fetching data files
+2020/11/27 17:16:10 Finish fetching data files
+2020/11/27 17:16:11 Blob name: Humorous.csv
+2020/11/27 17:16:11 Blob name: Non-humorous-unbiased.csv
+2020/11/27 17:16:11 Blob name: Non-humours-biased.csv
+2020/11/27 17:16:11 Start creating data source
+2020/11/27 17:16:11 Start listing data sources
+2020/11/27 17:16:12 finish listing data sources
+2020/11/27 17:16:15 Finish creating data source
+2020/11/27 17:16:15 Start creating search Index
+2020/11/27 17:16:19 Finish creating search Index
+2020/11/27 17:16:19 Start creating search indexer
+2020/11/27 17:16:21 Finish creating search indexer
+2020/11/27 17:16:21 Finishing...
+```
 
-========================================================================================================
-| Fetch api key
-========================================================================================================
-Command group 'search' is in preview. It may be changed/removed in a future release.
+searching uses the same tool:
 
-========================================================================================================
-| Removing indexer
-========================================================================================================
+```
+$ ./azcogsearch -s true
 
-Response: 204
+2020/11/27 17:17:47 Starting...
+2020/11/27 17:17:47 Subscription ID: 93b4e6fc-acb0-44ce-bc65-bcfc9b626edc
+2020/11/27 17:17:47 Fetching query key
+2020/11/27 17:17:48 Finishd fetching query key
+2020/11/27 17:17:48 Begin query execution
+2020/11/27 17:17:49 Finish query execution
+2020/11/27 17:17:49   0   Product : Original BB-8 by Sphero (No Droid Trainer)
+2020/11/27 17:17:49   0   Question: Does Donald Trump think BB-8 is a Loser or Hater?
+2020/11/27 17:17:49   0   Score   : 16.729845
+2020/11/27 17:17:49   1   Product : Donald Trump for President Make America Great Again T Shirt
+2020/11/27 17:17:49   1   Question: Will I be perceived as a sore loser if I'm seen wearing this shirt in school?
+2020/11/27 17:17:49   1   Score   : 14.836155
+2020/11/27 17:17:49 Finishing...
+```
 
-========================================================================================================
-| Removing index
-========================================================================================================
+as does tearing the resources down:
 
-Response: 204
+```
+./azcogsearch -d true
 
-========================================================================================================
-| Removing datasource
-========================================================================================================
-
-Response: 204
-
-========================================================================================================
-| Un-deploy template
-========================================================================================================
-
-========================================================================================================
-| Waiting for deletion
-========================================================================================================
-
-========================================================================================================
-| Remove resource group
-========================================================================================================
-
-========================================================================================================
-| Logging out
-========================================================================================================
+2020/11/27 17:18:52 Starting...
+2020/11/27 17:18:52 Subscription ID: 93b4e6fc-acb0-44ce-bc65-bcfc9b626edc
+2020/11/27 17:18:52 Cleaning up...
+2020/11/27 17:18:52 Waiting to delete resource group cogsearch
+2020/11/27 17:20:37 Finishing...
 ```
 
 ## Dataset
@@ -277,10 +128,11 @@ The columns are:
 
 ## References
 
- - https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/
- - https://docs.microsoft.com/en-us/azure/templates/
- - https://docs.microsoft.com/en-us/azure/search/query-simple-syntax
- - https://docs.microsoft.com/en-us/azure/search/query-odata-filter-orderby-syntax
+ - https://docs.microsoft.com/en-us/rest/api/azure/
+ - https://github.com/Azure/azure-sdk-for-go
+ - https://github.com/Azure-Samples/azure-sdk-for-go-samples
+ - https://docs.microsoft.com/en-us/azure/developer/go/
+
 
 ## License
 Copyright 2020 Leap Beyond Emerging Technologies B.V.
