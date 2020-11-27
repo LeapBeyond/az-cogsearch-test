@@ -1,0 +1,10 @@
+{
+  "baseName": "cogsearch",
+  "serviceName": "cogsearch-search",
+  "targetLocation" : "uksouth",
+  "subscriptionId" :  "93b4e6fc-acb0-44ce-bc65-bcfc9b626edc",
+  "clientId": "e0d8c6a7-3e6b-4827-a0af-a191818e0ab7",
+  "servicePrincipal": "http://terraformaz",
+  "servicePrincipalKey": "/Users/robert/.ssh/terraformaz.pfx",
+  "tenant": "azureleapbeyond.onmicrosoft.com"
+}
