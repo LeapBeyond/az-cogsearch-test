@@ -51,6 +51,7 @@ The subdirectories under here provide different ways of implementing the same se
 
 - `arm` uses a combination of ARM templates and API calls
 - `hybrid` uses a combination of Terraform and API calls
+- `go` uses the Azure SDK for Go and API calls
 
 ## License
 Copyright 2020 Leap Beyond Emerging Technologies B.V.
