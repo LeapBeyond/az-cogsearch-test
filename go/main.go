@@ -145,12 +145,6 @@ func doSearch(sess *models.AzureSession) error {
 		return err
 	}
 
-	//dsList := models.DataSourceResponse{}
-	//err = json.Unmarshal(body, &dsList)
-	//if err != nil {
-	//	return names, fmt.Errorf("JSON unmarshal on datasources failed: %v", err)
-	//}
-
 	searchResult := models.SearchResult{}
 	err = json.Unmarshal(result, &searchResult)
 	if err != nil {
